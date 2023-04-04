@@ -122,7 +122,6 @@ app.post("/create", async (req, res) => {
       user: findUser._id,
       newDate: `${year}.${month}.${day}.${hour}:${minute}`,
     });
-    console.log(newDate);
     await post.save();
     return res.status(201).json({ success: true, Message: "글 작성 성공" });
   } catch (error) {
@@ -273,4 +272,3 @@ app.delete("/comment/:id", async (req, res) => {
     res.status(500).json({ message: "서버 오류 발생" });
   }
 });
-
