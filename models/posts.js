@@ -26,7 +26,7 @@ const postSchema = mongoose.Schema({
       commentAt: {
         type: Date,
         required: true,
-        default: Date.now() + 9 * 60 * 60 * 1000, // 한국 시간
+        default: Date.now()
       },
       commentNewDate: {
         type: String,
