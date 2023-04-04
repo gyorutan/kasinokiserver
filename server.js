@@ -102,7 +102,7 @@ app.post("/api/register", async (req, res) => {
 
 //글 작성 요청
 app.post("/create", async (req, res) => {
-  const { userId, title, content, created_at } = req.body;
+  const { userId, title, content } = req.body;
 
   const date = new Date();
   const year = date.getFullYear();
@@ -120,7 +120,6 @@ app.post("/create", async (req, res) => {
       title,
       content,
       user: findUser._id,
-      created_at : created_at,
       newDate: `${year}.${month}.${day}.${hour}:${minute}`,
     });
     console.log(newDate);
@@ -233,7 +232,7 @@ app.put("/createComment/:id", async (req, res) => {
 
   const { id } = req.params;
 
-  const { comment, commentBy, commentAt } = req.body;
+  const { comment, commentBy } = req.body;
 
   const post = await Post.findById(id);
 
@@ -245,7 +244,6 @@ app.put("/createComment/:id", async (req, res) => {
     const newComment = {
       comment: comment,
       commentBy: commentBy,
-      commentAt: commentAt,
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
     };
 
@@ -275,3 +273,4 @@ app.delete("/comment/:id", async (req, res) => {
     res.status(500).json({ message: "서버 오류 발생" });
   }
 });
+
