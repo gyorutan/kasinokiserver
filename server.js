@@ -102,9 +102,9 @@ app.post("/api/register", async (req, res) => {
 
 //글 작성 요청
 app.post("/create", async (req, res) => {
-  const { userId, title, content } = req.body;
+  const { userId, title, content, created_at } = req.body;
 
-  const date = Date.now() + 9 * 60 * 60 * 1000;
+  const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -120,6 +120,7 @@ app.post("/create", async (req, res) => {
       title,
       content,
       user: findUser._id,
+      created_at : created_at,
       newDate: `${year}.${month}.${day}.${hour}:${minute}`,
     });
     console.log(newDate);
@@ -223,7 +224,7 @@ app.post("/duplication", async (req, res) => {
 //댓글 작성 요청
 app.put("/createComment/:id", async (req, res) => {
 
-  const date = Date.now() + 9 * 60 * 60 * 1000;
+  const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -232,7 +233,7 @@ app.put("/createComment/:id", async (req, res) => {
 
   const { id } = req.params;
 
-  const { comment, commentBy } = req.body;
+  const { comment, commentBy, commentAt } = req.body;
 
   const post = await Post.findById(id);
 
@@ -244,6 +245,7 @@ app.put("/createComment/:id", async (req, res) => {
     const newComment = {
       comment: comment,
       commentBy: commentBy,
+      commentAt: commentAt,
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
     };
 
@@ -273,4 +275,3 @@ app.delete("/comment/:id", async (req, res) => {
     res.status(500).json({ message: "서버 오류 발생" });
   }
 });
-
