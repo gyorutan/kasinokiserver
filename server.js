@@ -104,11 +104,12 @@ app.post("/create", async (req, res) => {
   const { userId, title, content } = req.body;
 
   const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
+  const NewDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+  const year = NewDate.getFullYear();
+  const month = String(NewDate.getMonth() + 1).padStart(2, "0");
+  const day = String(NewDate.getDate()).padStart(2, "0");
+  const hour = String(NewDate.getHours()).padStart(2, "0");
+  const minute = String(NewDate.getMinutes()).padStart(2, "0");
 
   try {
     const findUser = await User.findOne({ _id: userId }).exec();
@@ -119,8 +120,9 @@ app.post("/create", async (req, res) => {
       title,
       content,
       user: findUser._id,
-      newDate: `${year}년 ${month}월 ${day}일 ${hour}시 ${minute}분`,
+      newDate: `${year}.${month}.${day}.${hour}:${minute}`,
     });
+    console.log(newDate);
     await post.save();
     return res.status(201).json({ success: true, Message: "글 작성 성공" });
   } catch (error) {
@@ -209,46 +211,42 @@ app.post('/duplication', async (req, res) => {
 })
 
 //댓글 작성 요청
-app.put('/createComment/:id', async (req, res) => {
+app.put("/createComment/:id", async (req, res) => {
 
   const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
+  const NewDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+  const year = NewDate.getFullYear();
+  const month = String(NewDate.getMonth() + 1).padStart(2, "0");
+  const day = String(NewDate.getDate()).padStart(2, "0");
+  const hour = String(NewDate.getHours()).padStart(2, "0");
+  const minute = String(NewDate.getMinutes()).padStart(2, "0");
 
   const { id } = req.params;
 
   const { comment, commentBy } = req.body;
 
-  const post = await Post.findById( id );
-
+  const post = await Post.findById(id);
 
   try {
-  
-
-    if(!post) {
-      return res.status(404).json({ message: '포스트를 찾을 수 없습니다' })
+    if (!post) {
+      return res.status(404).json({ message: "포스트를 찾을 수 없습니다" });
     }
 
     const newComment = {
-      comment : comment,
-      commentBy : commentBy,
-      commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`
-  };
+      comment: comment,
+      commentBy: commentBy,
+      commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
+    };
 
-
+    console.log(commentNewDate);
     post.comments.push(newComment);
     const updatePost = await post.save();
     console.log(updatePost);
     res.status(201).json(updatePost);
-    }
-   catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
-
-} )
+});
 
 //댓글 삭제요청
 app.delete('/comment/:id', async (req, res) => {
