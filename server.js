@@ -211,21 +211,23 @@ app.post('/duplication', async (req, res) => {
 //댓글 작성 요청
 app.put('/createComment/:id', async (req, res) => {
 
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+
+  const { id } = req.params;
+
+  const { comment, commentBy } = req.body;
+
+  const post = await Post.findById( id );
+
+
   try {
   
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hour = String(date.getHours()).padStart(2, "0");
-    const minute = String(date.getMinutes()).padStart(2, "0");
 
-    const { id } = req.params;
-    console.log(req.params.id)
-    const { comment, commentBy } = req.body;
-    console.log(req.body);
-    const post = await Post.findById( id );
-    console.log(post);
     if(!post) {
       return res.status(404).json({ message: '포스트를 찾을 수 없습니다' })
     }
@@ -233,7 +235,6 @@ app.put('/createComment/:id', async (req, res) => {
     const newComment = {
       comment : comment,
       commentBy : commentBy,
-      commentAt: new Date(),
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`
   };
 
