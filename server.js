@@ -19,13 +19,15 @@ const app = express();
 //app.use
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors({
-  origin: 'https://kasinoki.site'
-}));
+app.use(
+  cors({
+    origin: "https://kasinoki.site",
+  })
+);
 
 //서버, DB 연결
-app.listen('3000', () => {
-  console.log('listening on Server');
+app.listen("3000", () => {
+  console.log("listening on Server");
   mongoose
     .connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
@@ -35,10 +37,9 @@ app.listen('3000', () => {
     .catch((err) => console.log(err));
 });
 
-app.get('/', async (req, res) => {
-  res.send({ Message: '서버가 성공적으로 배포되었습니다!'})
-})
-
+app.get("/", async (req, res) => {
+  res.send({ Message: "서버가 성공적으로 배포되었습니다!" });
+});
 
 //로그인 요청
 app.post("/api/login", async (req, res) => {
@@ -72,14 +73,14 @@ app.post("/api/login", async (req, res) => {
 //회원가입 요청
 app.post("/api/register", async (req, res) => {
   const { username, loginId, loginPw } = req.body;
-  if(!username){
-    return res.status(404).json({ message: "닉네임을 입력하세요"})
+  if (!username) {
+    return res.status(404).json({ message: "닉네임을 입력하세요" });
   }
-  if(!loginId){
-    return res.status(404).json({ message: "아이디를 입력하세요"})
+  if (!loginId) {
+    return res.status(404).json({ message: "아이디를 입력하세요" });
   }
-  if(!loginPw){
-    return res.status(404).json({ message: "비밀번호를 입력하세요"})
+  if (!loginPw) {
+    return res.status(404).json({ message: "비밀번호를 입력하세요" });
   }
 
   const userExists = await User.exists({ loginId }).exec();
@@ -103,13 +104,12 @@ app.post("/api/register", async (req, res) => {
 app.post("/create", async (req, res) => {
   const { userId, title, content } = req.body;
 
-  const date = new Date();
-  const NewDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
-  const year = NewDate.getFullYear();
-  const month = String(NewDate.getMonth() + 1).padStart(2, "0");
-  const day = String(NewDate.getDate()).padStart(2, "0");
-  const hour = String(NewDate.getHours()).padStart(2, "0");
-  const minute = String(NewDate.getMinutes()).padStart(2, "0");
+  const date = Date.now() + 9 * 60 * 60 * 1000;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
 
   try {
     const findUser = await User.findOne({ _id: userId }).exec();
@@ -138,7 +138,11 @@ app.get("/allposts", async (req, res) => {
   // allposts로 get요청이 들어오면 DB의 POST에서 모든 글을 찾아라 그리고 그것을 응답해라
   try {
     const allPosts = await Post.find()
-      .populate({ path: "user", select: "username" })
+    .sort({ created_at: -1 })
+    .populate({
+      path: "user",
+      select: "username",
+    });
     res.status(200).json(allPosts);
   } catch (error) {
     console.log(error);
@@ -177,49 +181,54 @@ app.delete("/post/:id", async (req, res) => {
 });
 
 //글 수정 PUT 요청
-app.put('/post/:id', async (req, res) => {
+app.put("/post/:id", async (req, res) => {
   try {
-    
-    const { id } = req.params
-    const { title, content } = req.body
+    const { id } = req.params;
+    const { title, content } = req.body;
 
-    if(!mongoose.Types.ObjectId.isValid(id)){
-      return res.status(404).json({ Message : '포스트를 찾을 수 없습니다'})
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ Message: "포스트를 찾을 수 없습니다" });
     }
 
-    const updatePost = { title, content }
+    const updatePost = { title, content };
     await Post.findByIdAndUpdate(id, updatePost, { new: true });
     res.json(updatePost);
-
   } catch (error) {
     console.log(error);
   }
-})
+});
 
 //닉네임 중복확인 요청
-app.post('/duplication', async (req, res) => {
-  const { username } = req.body
-  if(!username){
-    return res.status(404).json({ Message: '닉네임을 입력하세요' })
+app.post("/duplication", async (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(404).json({ Message: "닉네임을 입력하세요" });
   }
-  const usernameExists =  await User.exists({username}).exec();
-  if(usernameExists){
-    return res.status(409).json({ success: false, Message: '이미 사용중인 닉네임 입니다' });
+  const usernameExists = await User.exists({ username }).exec();
+  if (usernameExists) {
+    return res
+      .status(409)
+      .json({ success: false, Message: "이미 사용중인 닉네임 입니다" });
   } else {
-    return res.status(200).json({ username: username, success: true, Message: '사용가능한 닉네임 입니다' });
+    return res
+      .status(200)
+      .json({
+        username: username,
+        success: true,
+        Message: "사용가능한 닉네임 입니다",
+      });
   }
-})
+});
 
 //댓글 작성 요청
 app.put("/createComment/:id", async (req, res) => {
 
-  const date = new Date();
-  const NewDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
-  const year = NewDate.getFullYear();
-  const month = String(NewDate.getMonth() + 1).padStart(2, "0");
-  const day = String(NewDate.getDate()).padStart(2, "0");
-  const hour = String(NewDate.getHours()).padStart(2, "0");
-  const minute = String(NewDate.getMinutes()).padStart(2, "0");
+  const date = Date.now() + 9 * 60 * 60 * 1000;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
 
   const { id } = req.params;
 
@@ -249,17 +258,19 @@ app.put("/createComment/:id", async (req, res) => {
 });
 
 //댓글 삭제요청
-app.delete('/comment/:id', async (req, res) => {
+app.delete("/comment/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const post = await Post.findByIdAndUpdate(
       req.body.postId,
       { $pull: { comments: { _id: id } } },
       { new: true }
-    )
+    );
     res.status(200).json(post);
-    console.log(req.body.postId)
-    console.log(req.body)
+    console.log(req.body.postId);
+    console.log(req.body);
   } catch (error) {
-    res.status(500).json({ message: '서버 오류 발생' });  }
-})
+    res.status(500).json({ message: "서버 오류 발생" });
+  }
+});
+
