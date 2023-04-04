@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const postSchema = mongoose.Schema({
@@ -27,7 +26,7 @@ const postSchema = mongoose.Schema({
       commentAt: {
         type: Date,
         required: true,
-        default: Date.now,
+        default: Date.now()
       },
       commentNewDate: {
         type: String,
