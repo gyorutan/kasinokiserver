@@ -227,13 +227,13 @@ app.put("/update/:id", async (req, res) => {
   }
 });
 
-var count2 = 0
+let count2 = 0
 //PUT 자유게시판 댓글 작성 요청
 app.put("/comment/:id", async (req, res) => {
+  
+  count2++
 
   try {
-
-    count2++
 
     const date = new Date();
     const year = date.getFullYear();
