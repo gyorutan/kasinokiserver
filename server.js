@@ -235,7 +235,7 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
 
   try {
 
-    newcount++
+    commentcount++
 
     const date = new Date();
     const year = date.getFullYear();
@@ -288,9 +288,9 @@ app.delete("/freeboard/delete/comment/:id", async (req, res) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 연습게시판
 
-//POST 연습게시판 글 작성 요청
-app.get('/allposts/practiceboard', async (req, res) => {
+// //POST 연습게시판 글 작성 요청
+// app.get('/allposts/practiceboard', async (req, res) => {
 
-})
+// })
 
 
