@@ -130,8 +130,11 @@ app.post("/duplication", async (req, res) => {
 //POST 자유게시판 글 작성 요청
 let postNumber = 0
 app.post("/write", async (req, res) => {
+  
 
   const { userId, title, content } = req.body;
+
+  postNumber++
 
   const date = new Date();
   const newDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
@@ -152,7 +155,7 @@ app.post("/write", async (req, res) => {
       content,
       user: findUser._id,
       newDate: `${year}.${month}.${day} ${hour}:${minute}`,
-      postNumber: postNumber++
+      postNumber: postNumber
     });
     await post.save();
     return res.status(201).json({ success: true, Message: "글 작성 성공" });
@@ -229,9 +232,11 @@ app.put("/update/:id", async (req, res) => {
   }
 });
 
-
+let commentNumber = 0
 //PUT 자유게시판 댓글 작성 요청
 app.put("/createComment/:id", async (req, res) => {
+
+  commentNumber++
 
   try {
 
@@ -258,6 +263,7 @@ app.put("/createComment/:id", async (req, res) => {
       comment: comment,
       commentBy: commentBy,
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
+      commentNumber: commentNumber
     };
 
     post.comments.push(newComment);
