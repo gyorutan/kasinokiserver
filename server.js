@@ -8,7 +8,7 @@ const cors = require("cors");
 
 //DB 스키마
 const User = require("./models/users.js");
-const Post = require("./models/freeboard.js");
+const Freeboard = require("./models/freeboard.js");
 const practicePost = require("./models/practiceboard.js");
 const livePost = require("./models/liveboard.js");
 
@@ -149,7 +149,7 @@ app.post("/write/freeboard", async (req, res) => {
     if (!findUser) {
       return res.status(404).json({ Message: "유저를 찾을 수 없습니다" });
     }
-    const post = new Post({
+    const post = new Freeboard({
       title,
       content,
       user: findUser._id,
@@ -170,7 +170,7 @@ app.post("/write/freeboard", async (req, res) => {
 app.get("/allposts/freeboard", async (req, res) => {
   // allposts로 get요청이 들어오면 DB의 POST에서 모든 글을 찾아라 그리고 그것을 응답해라
   try {
-    const allPosts = await Post.find()
+    const allPosts = await Freeboard.find()
     .sort({ postNumber : -1 })
     .populate({
       path: "user",
@@ -187,7 +187,7 @@ app.get("/allposts/freeboard", async (req, res) => {
 app.get("/freeboard/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id).populate({
+    const post = await Freeboard.findById(id).populate({
       path: "user",
       select: "username",
     });
@@ -206,7 +206,7 @@ app.get("/freeboard/:id", async (req, res) => {
 app.delete("/freeboard/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    await Post.findByIdAndRemove(id);
+    await Freeboard.findByIdAndRemove(id);
     res.json({ Message: "포스트가 삭제되었습니다" });
   } catch (error) {
     console.log(error);
@@ -224,7 +224,7 @@ app.put("/freeboard/update/:id", async (req, res) => {
     }
 
     const updatePost = { title, content };
-    await Post.findByIdAndUpdate(id, updatePost, { new: true });
+    await Freeboard.findByIdAndUpdate(id, updatePost, { new: true });
     res.json(updatePost);
   } catch (error) {
     console.log(error);
@@ -250,7 +250,7 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
   
     const { comment, commentBy } = req.body;
   
-    const post = await Post.findById(id);
+    const post = await Freeboard.findById(id);
 
     if (!post) {
       return res.status(404).json({ message: "포스트를 찾을 수 없습니다" });
@@ -275,7 +275,7 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
 app.delete("/freeboard/delete/comment/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findByIdAndUpdate(
+    const post = await Freeboard.findByIdAndUpdate(
       req.body.postId,
       { $pull: { comments: { _id: id } } },
       { new: true }
@@ -294,4 +294,5 @@ app.delete("/freeboard/delete/comment/:id", async (req, res) => {
 app.get('/allposts/practiceboard', async (req, res) => {
 
 })
+
 
