@@ -6,9 +6,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 
-//DB
+//DB 스키마
 const User = require("./models/users.js");
-const Post = require("./models/posts.js");
+const Post = require("./models/freeboard.js");
+const practicePost = require("./models/practiceboard.js");
+const livePost = require("./models/liveboard.js");
 
 //dotenv
 dotenv.config();
@@ -21,13 +23,13 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://kasinoki.site",
+    // origin: "https://kasinoki.site",
   })
 );
 
 //서버, DB 연결
 app.listen("3000", () => {
-  console.log("listening on Server");
+  console.log("listening on Server port 3000");
   mongoose
     .connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
@@ -41,7 +43,7 @@ app.get("/", async (req, res) => {
   res.send({ Message: "서버가 성공적으로 배포되었습니다!" });
 });
 
-//로그인 요청
+//POST 로그인 요청
 app.post("/api/login", async (req, res) => {
   const loginId = req.body.loginId;
   const loginPw = req.body.loginPw;
@@ -70,7 +72,7 @@ app.post("/api/login", async (req, res) => {
     .json({ success: true, user: { username: user.username }, token });
 });
 
-//회원가입 요청
+//POST 회원가입 요청
 app.post("/api/register", async (req, res) => {
   const { username, loginId, loginPw } = req.body;
   if (!username) {
@@ -100,105 +102,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-//글 작성 요청
-app.post("/create", async (req, res) => {
-  const { userId, title, content } = req.body;
-
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
-
-  try {
-    const findUser = await User.findOne({ _id: userId }).exec();
-    if (!findUser) {
-      return res.status(404).json({ Message: "유저를 찾을 수 없습니다" });
-    }
-    const post = new Post({
-      title,
-      content,
-      user: findUser._id,
-      newDate: `${year}.${month}.${day}.${hour}:${minute}`,
-    });
-    console.log(newDate);
-    await post.save();
-    return res.status(201).json({ success: true, Message: "글 작성 성공" });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ success: false, Message: "글 작성에 실패하였습니다" });
-  }
-});
-
-//게시판 모든 글 GET 요청
-app.get("/allposts", async (req, res) => {
-  // allposts로 get요청이 들어오면 DB의 POST에서 모든 글을 찾아라 그리고 그것을 응답해라
-  try {
-    const allPosts = await Post.find()
-    .sort({ created_at: -1 })
-    .populate({
-      path: "user",
-      select: "username",
-    });
-    res.status(200).json(allPosts);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send("서버 에러 발생");
-  }
-});
-
-//게시판 글 상세페이지 GET 요청
-app.get("/post/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const post = await Post.findById(id).populate({
-      path: "user",
-      select: "username",
-    });
-
-    if (!post) {
-      return res.json({ Message: "포스트를 찾을 수 없습니다" });
-    }
-
-    res.status(200).json(post);
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-//글 삭제 DELETE 요청
-app.delete("/post/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Post.findByIdAndRemove(id);
-    res.json({ Message: "포스트가 삭제되었습니다" });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-//글 수정 PUT 요청
-app.put("/post/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { title, content } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).json({ Message: "포스트를 찾을 수 없습니다" });
-    }
-
-    const updatePost = { title, content };
-    await Post.findByIdAndUpdate(id, updatePost, { new: true });
-    res.json(updatePost);
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-//닉네임 중복확인 요청
+//POST 닉네임 중복확인 요청
 app.post("/duplication", async (req, res) => {
   const { username } = req.body;
   if (!username) {
@@ -220,8 +124,16 @@ app.post("/duplication", async (req, res) => {
   }
 });
 
-//댓글 작성 요청
-app.put("/createComment/:id", async (req, res) => {
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 자유게시판
+
+let freeboardcount = 0
+//POST 자유게시판 글 작성 요청
+app.post("/write/freeboard", async (req, res) => {
+  const { userId, title, content } = req.body;
+
+  count++
 
   const date = new Date();
   const year = date.getFullYear();
@@ -230,13 +142,114 @@ app.put("/createComment/:id", async (req, res) => {
   const hour = String(date.getHours()).padStart(2, "0");
   const minute = String(date.getMinutes()).padStart(2, "0");
 
-  const { id } = req.params;
+  try {
+    const findUser = await User.findOne({ _id: userId }).exec();
+    if (!findUser) {
+      return res.status(404).json({ Message: "유저를 찾을 수 없습니다" });
+    }
+    const post = new Post({
+      title,
+      content,
+      user: findUser._id,
+      newDate: `${year}.${month}.${day} ${hour}:${minute}`,
+      postNumber: freeboardcount
+    });
+    await post.save();
+    return res.status(201).json({ success: true, Message: "글 작성 성공" });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, Message: "글 작성에 실패하였습니다" });
+  }
+});
 
-  const { comment, commentBy } = req.body;
+//GET 자유게시판 모든 글 요청
+app.get("/allposts/freeboard", async (req, res) => {
+  // allposts로 get요청이 들어오면 DB의 POST에서 모든 글을 찾아라 그리고 그것을 응답해라
+  try {
+    const allPosts = await Post.find()
+    .sort({ postNumber : -1 })
+    .populate({
+      path: "user",
+      select: "username",
+    });
+    res.status(200).json(allPosts);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("서버 에러 발생");
+  }
+});
 
-  const post = await Post.findById(id);
+//GET 자유게시판 글 상세페이지 요청
+app.get("/freeboard/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id).populate({
+      path: "user",
+      select: "username",
+    });
+
+    if (!post) {
+      return res.json({ Message: "포스트를 찾을 수 없습니다" });
+    }
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//DELETE 자유게시판 글 삭제 요청
+app.delete("/freeboard/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Post.findByIdAndRemove(id);
+    res.json({ Message: "포스트가 삭제되었습니다" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//PUT 자유게시판 글 수정 요청
+app.put("/freeboard/update/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ Message: "포스트를 찾을 수 없습니다" });
+    }
+
+    const updatePost = { title, content };
+    await Post.findByIdAndUpdate(id, updatePost, { new: true });
+    res.json(updatePost);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+var commentcount = 0
+//PUT 자유게시판 댓글 작성 요청
+app.put("/freeboard/write/comment/:id", async (req, res) => {
 
   try {
+
+    newcount++
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+  
+    const { id } = req.params;
+  
+    const { comment, commentBy } = req.body;
+  
+    const post = await Post.findById(id);
+
     if (!post) {
       return res.status(404).json({ message: "포스트를 찾을 수 없습니다" });
     }
@@ -245,20 +258,19 @@ app.put("/createComment/:id", async (req, res) => {
       comment: comment,
       commentBy: commentBy,
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
+      commentNumber: commentcount
     };
 
-    console.log(commentNewDate);
     post.comments.push(newComment);
     const updatePost = await post.save();
-    console.log(updatePost);
     res.status(201).json(updatePost);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-//댓글 삭제요청
-app.delete("/comment/:id", async (req, res) => {
+//DELETE 자유게시판 댓글 삭제 요청
+app.delete("/freeboard/delete/comment/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const post = await Post.findByIdAndUpdate(
@@ -267,9 +279,18 @@ app.delete("/comment/:id", async (req, res) => {
       { new: true }
     );
     res.status(200).json(post);
-    console.log(req.body.postId);
-    console.log(req.body);
   } catch (error) {
     res.status(500).json({ message: "서버 오류 발생" });
   }
 });
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 연습게시판
+
+//POST 연습게시판 글 작성 요청
+app.get('/allposts/practiceboard', async (req, res) => {
+
+})
+
+
