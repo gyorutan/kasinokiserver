@@ -9,8 +9,8 @@ const cors = require("cors");
 //DB 스키마
 const User = require("./models/users.js");
 const Freeboard = require("./models/freeboard.js");
-const practicePost = require("./models/practiceboard.js");
-const livePost = require("./models/liveboard.js");
+// const practicePost = require("./models/practiceboard.js");
+// const livePost = require("./models/liveboard.js");
 
 //dotenv
 dotenv.config();
@@ -21,11 +21,15 @@ const app = express();
 //app.use
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://kasinoki.site",
+  })
+);
 
 //서버, DB 연결
 app.listen("3000", () => {
-  console.log("listening on Server");
+  console.log("listening on Server port 3000");
   mongoose
     .connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
@@ -132,13 +136,11 @@ app.post("/write/freeboard", async (req, res) => {
   freeboardcount++
 
   const date = new Date();
-  const newDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-  const year = newDate.getFullYear();
-  const month = String(newDate.getMonth() + 1).padStart(2, "0");
-  const day = String(newDate.getDate()).padStart(2, "0");
-  const hour = String(newDate.getHours()).padStart(2, "0");
-  const minute = String(newDate.getMinutes()).padStart(2, "0");
-  const second = String(newDate.getSeconds()).padStart(2, "0");
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
 
   try {
     const findUser = await User.findOne({ _id: userId }).exec();
@@ -183,7 +185,7 @@ app.get("/allposts/freeboard", async (req, res) => {
 app.get("/freeboard/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Freeboard.findById(id).populate({
+    const post = await Post.findById(id).populate({
       path: "user",
       select: "username",
     });
@@ -202,7 +204,7 @@ app.get("/freeboard/:id", async (req, res) => {
 app.delete("/freeboard/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    await Freeboard.findByIdAndRemove(id);
+    await Post.findByIdAndRemove(id);
     res.json({ Message: "포스트가 삭제되었습니다" });
   } catch (error) {
     console.log(error);
@@ -220,7 +222,7 @@ app.put("/freeboard/update/:id", async (req, res) => {
     }
 
     const updatePost = { title, content };
-    await Freeboard.findByIdAndUpdate(id, updatePost, { new: true });
+    await Post.findByIdAndUpdate(id, updatePost, { new: true });
     res.json(updatePost);
   } catch (error) {
     console.log(error);
@@ -246,7 +248,7 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
   
     const { comment, commentBy } = req.body;
   
-    const post = await Freeboard.findById(id);
+    const post = await Post.findById(id);
 
     if (!post) {
       return res.status(404).json({ message: "포스트를 찾을 수 없습니다" });
@@ -271,7 +273,7 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
 app.delete("/freeboard/delete/comment/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Freeboard.findByIdAndUpdate(
+    const post = await Post.findByIdAndUpdate(
       req.body.postId,
       { $pull: { comments: { _id: id } } },
       { new: true }
