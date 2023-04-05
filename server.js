@@ -21,9 +21,7 @@ const app = express();
 //app.use
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(
-  cors()
-);
+app.use(cors());
 
 //서버, DB 연결
 app.listen("3000", () => {
@@ -131,7 +129,7 @@ let freeboardcount = 0
 app.post("/write/freeboard", async (req, res) => {
   const { userId, title, content } = req.body;
 
-  count++
+  freeboardcount++
 
   const date = new Date();
   const newDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
