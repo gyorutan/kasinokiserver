@@ -295,4 +295,3 @@ app.get('/allposts/practiceboard', async (req, res) => {
 
 })
 
-
