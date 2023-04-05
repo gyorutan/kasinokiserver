@@ -231,7 +231,6 @@ app.put("/update/:id", async (req, res) => {
 
 
 //PUT 자유게시판 댓글 작성 요청
-let commentNumber = 0
 app.put("/createComment/:id", async (req, res) => {
 
   try {
@@ -259,7 +258,6 @@ app.put("/createComment/:id", async (req, res) => {
       comment: comment,
       commentBy: commentBy,
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
-      commentNumber: commentNumber++
     };
 
     post.comments.push(newComment);
