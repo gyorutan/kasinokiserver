@@ -111,6 +111,7 @@ app.post("/create", async (req, res) => {
   const day = String(newDate.getDate()).padStart(2, "0");
   const hour = String(newDate.getHours()).padStart(2, "0");
   const minute = String(newDate.getMinutes()).padStart(2, "0");
+  const second = String(newDate.getSeconds()).padStart(2, "0");
 
   try {
     const findUser = await User.findOne({ _id: userId }).exec();
@@ -121,7 +122,7 @@ app.post("/create", async (req, res) => {
       title,
       content,
       user: findUser._id,
-      newDate: `${year}.${month}.${day}.${hour}:${minute}`,
+      newDate: `${year}.${month}.${day} ${hour}:${minute}:${second}`,
     });
     await post.save();
     return res.status(201).json({ success: true, Message: "글 작성 성공" });
@@ -232,6 +233,7 @@ app.put("/createComment/:id", async (req, res) => {
     const day = String(newDate.getDate()).padStart(2, "0");
     const hour = String(newDate.getHours()).padStart(2, "0");
     const minute = String(newDate.getMinutes()).padStart(2, "0");
+    const second = String(newDate.getSeconds()).padStart(2, "0");
   
     const { id } = req.params;
   
@@ -246,7 +248,7 @@ app.put("/createComment/:id", async (req, res) => {
     const newComment = {
       comment: comment,
       commentBy: commentBy,
-      commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
+      commentNewDate: `${year}.${month}.${day} ${hour}:${minute}:${second}`,
     };
 
     post.comments.push(newComment);
