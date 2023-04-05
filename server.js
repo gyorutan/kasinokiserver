@@ -8,9 +8,7 @@ const cors = require("cors");
 
 //DB 스키마
 const User = require("./models/users.js");
-const Freeboard = require("./models/freeboard.js");
-// const practicePost = require("./models/practiceboard.js");
-// const livePost = require("./models/liveboard.js");
+const Board = require("./models/boards.js");
 
 //dotenv
 dotenv.config();
@@ -128,12 +126,12 @@ app.post("/duplication", async (req, res) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 자유게시판
 
-let freeboardcount = 0
+let count = 0
 //POST 자유게시판 글 작성 요청
-app.post("/write/freeboard", async (req, res) => {
+app.post("/write", async (req, res) => {
   const { userId, title, content } = req.body;
 
-  freeboardcount++
+  count++
 
   const date = new Date();
   const year = date.getFullYear();
@@ -147,12 +145,12 @@ app.post("/write/freeboard", async (req, res) => {
     if (!findUser) {
       return res.status(404).json({ Message: "유저를 찾을 수 없습니다" });
     }
-    const post = new Freeboard({
+    const post = new Board({
       title,
       content,
       user: findUser._id,
       newDate: `${year}.${month}.${day} ${hour}:${minute}`,
-      postNumber: freeboardcount
+      postNumber: count
     });
     await post.save();
     return res.status(201).json({ success: true, Message: "글 작성 성공" });
@@ -165,10 +163,10 @@ app.post("/write/freeboard", async (req, res) => {
 });
 
 //GET 자유게시판 모든 글 요청
-app.get("/allposts/freeboard", async (req, res) => {
+app.get("/allposts", async (req, res) => {
   // allposts로 get요청이 들어오면 DB의 POST에서 모든 글을 찾아라 그리고 그것을 응답해라
   try {
-    const allPosts = await Freeboard.find()
+    const allPosts = await Board.find()
     .sort({ postNumber : -1 })
     .populate({
       path: "user",
@@ -182,10 +180,10 @@ app.get("/allposts/freeboard", async (req, res) => {
 });
 
 //GET 자유게시판 글 상세페이지 요청
-app.get("/freeboard/:id", async (req, res) => {
+app.get("/post/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id).populate({
+    const post = await Board.findById(id).populate({
       path: "user",
       select: "username",
     });
@@ -201,10 +199,10 @@ app.get("/freeboard/:id", async (req, res) => {
 });
 
 //DELETE 자유게시판 글 삭제 요청
-app.delete("/freeboard/:id", async (req, res) => {
+app.delete("/post/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    await Post.findByIdAndRemove(id);
+    await Board.findByIdAndRemove(id);
     res.json({ Message: "포스트가 삭제되었습니다" });
   } catch (error) {
     console.log(error);
@@ -212,7 +210,7 @@ app.delete("/freeboard/:id", async (req, res) => {
 });
 
 //PUT 자유게시판 글 수정 요청
-app.put("/freeboard/update/:id", async (req, res) => {
+app.put("/update/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content } = req.body;
@@ -222,20 +220,20 @@ app.put("/freeboard/update/:id", async (req, res) => {
     }
 
     const updatePost = { title, content };
-    await Post.findByIdAndUpdate(id, updatePost, { new: true });
+    await Board.findByIdAndUpdate(id, updatePost, { new: true });
     res.json(updatePost);
   } catch (error) {
     console.log(error);
   }
 });
 
-var commentcount = 0
+var count2 = 0
 //PUT 자유게시판 댓글 작성 요청
 app.put("/freeboard/write/comment/:id", async (req, res) => {
 
   try {
 
-    commentcount++
+    count2++
 
     const date = new Date();
     const year = date.getFullYear();
@@ -248,7 +246,7 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
   
     const { comment, commentBy } = req.body;
   
-    const post = await Post.findById(id);
+    const post = await Board.findById(id);
 
     if (!post) {
       return res.status(404).json({ message: "포스트를 찾을 수 없습니다" });
@@ -258,7 +256,7 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
       comment: comment,
       commentBy: commentBy,
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
-      commentNumber: commentcount
+      commentNumber: count2
     };
 
     post.comments.push(newComment);
@@ -270,10 +268,10 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
 });
 
 //DELETE 자유게시판 댓글 삭제 요청
-app.delete("/freeboard/delete/comment/:id", async (req, res) => {
+app.delete("/comment/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findByIdAndUpdate(
+    const post = await Board.findByIdAndUpdate(
       req.body.postId,
       { $pull: { comments: { _id: id } } },
       { new: true }
@@ -283,14 +281,5 @@ app.delete("/freeboard/delete/comment/:id", async (req, res) => {
     res.status(500).json({ message: "서버 오류 발생" });
   }
 });
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 연습게시판
-
-// //POST 연습게시판 글 작성 요청
-// app.get('/allposts/practiceboard', async (req, res) => {
-
-// })
 
 
