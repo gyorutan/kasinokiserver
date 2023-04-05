@@ -23,13 +23,21 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(
   cors({
+<<<<<<< HEAD
     // origin: "https://kasinoki.site",
+=======
+    origin: "https://kasinoki.site",
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
   })
 );
 
 //서버, DB 연결
 app.listen("3000", () => {
+<<<<<<< HEAD
   console.log("listening on Server port 3000");
+=======
+  console.log("listening on Server");
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
   mongoose
     .connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
@@ -43,7 +51,11 @@ app.get("/", async (req, res) => {
   res.send({ Message: "서버가 성공적으로 배포되었습니다!" });
 });
 
+<<<<<<< HEAD
 //POST 로그인 요청
+=======
+//로그인 요청
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
 app.post("/api/login", async (req, res) => {
   const loginId = req.body.loginId;
   const loginPw = req.body.loginPw;
@@ -136,11 +148,13 @@ app.post("/write/freeboard", async (req, res) => {
   count++
 
   const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
+  const newDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const year = newDate.getFullYear();
+  const month = String(newDate.getMonth() + 1).padStart(2, "0");
+  const day = String(newDate.getDate()).padStart(2, "0");
+  const hour = String(newDate.getHours()).padStart(2, "0");
+  const minute = String(newDate.getMinutes()).padStart(2, "0");
+  const second = String(newDate.getSeconds()).padStart(2, "0");
 
   try {
     const findUser = await User.findOne({ _id: userId }).exec();
@@ -151,8 +165,12 @@ app.post("/write/freeboard", async (req, res) => {
       title,
       content,
       user: findUser._id,
+<<<<<<< HEAD
       newDate: `${year}.${month}.${day} ${hour}:${minute}`,
       postNumber: freeboardcount
+=======
+      newDate: `${year}.${month}.${day} ${hour}:${minute}:${second}`,
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
     });
     await post.save();
     return res.status(201).json({ success: true, Message: "글 작성 성공" });
@@ -169,7 +187,11 @@ app.get("/allposts/freeboard", async (req, res) => {
   // allposts로 get요청이 들어오면 DB의 POST에서 모든 글을 찾아라 그리고 그것을 응답해라
   try {
     const allPosts = await Post.find()
+<<<<<<< HEAD
     .sort({ postNumber : -1 })
+=======
+    .sort({ newDate : -1 })
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
     .populate({
       path: "user",
       select: "username",
@@ -211,8 +233,13 @@ app.delete("/freeboard/:id", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 //PUT 자유게시판 글 수정 요청
 app.put("/freeboard/update/:id", async (req, res) => {
+=======
+//글 수정 PUT 요청
+app.put("/post/:id", async (req, res) => {
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
   try {
     const { id } = req.params;
     const { title, content } = req.body;
@@ -229,6 +256,7 @@ app.put("/freeboard/update/:id", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 var commentcount = 0
 //PUT 자유게시판 댓글 작성 요청
 app.put("/freeboard/write/comment/:id", async (req, res) => {
@@ -243,6 +271,43 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
     const day = String(date.getDate()).padStart(2, "0");
     const hour = String(date.getHours()).padStart(2, "0");
     const minute = String(date.getMinutes()).padStart(2, "0");
+=======
+//닉네임 중복확인 요청
+app.post("/duplication", async (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(404).json({ Message: "닉네임을 입력하세요" });
+  }
+  const usernameExists = await User.exists({ username }).exec();
+  if (usernameExists) {
+    return res
+      .status(409)
+      .json({ success: false, Message: "이미 사용중인 닉네임 입니다" });
+  } else {
+    return res
+      .status(200)
+      .json({
+        username: username,
+        success: true,
+        Message: "사용가능한 닉네임 입니다",
+      });
+  }
+});
+
+//댓글 작성 요청
+app.put("/createComment/:id", async (req, res) => {
+
+  try {
+
+    const date = new Date();
+    const newDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+    const year = newDate.getFullYear();
+    const month = String(newDate.getMonth() + 1).padStart(2, "0");
+    const day = String(newDate.getDate()).padStart(2, "0");
+    const hour = String(newDate.getHours()).padStart(2, "0");
+    const minute = String(newDate.getMinutes()).padStart(2, "0");
+    const second = String(newDate.getSeconds()).padStart(2, "0");
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
   
     const { id } = req.params;
   
@@ -257,8 +322,12 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
     const newComment = {
       comment: comment,
       commentBy: commentBy,
+<<<<<<< HEAD
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
       commentNumber: commentcount
+=======
+      commentNewDate: `${year}.${month}.${day} ${hour}:${minute}:${second}`,
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
     };
 
     post.comments.push(newComment);
@@ -269,8 +338,14 @@ app.put("/freeboard/write/comment/:id", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 //DELETE 자유게시판 댓글 삭제 요청
 app.delete("/freeboard/delete/comment/:id", async (req, res) => {
+=======
+
+//댓글 삭제요청
+app.delete("/comment/:id", async (req, res) => {
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
   try {
     const { id } = req.params;
     const post = await Post.findByIdAndUpdate(
@@ -279,10 +354,16 @@ app.delete("/freeboard/delete/comment/:id", async (req, res) => {
       { new: true }
     );
     res.status(200).json(post);
+<<<<<<< HEAD
+=======
+    console.log(req.body.postId);
+    console.log(req.body);
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
   } catch (error) {
     res.status(500).json({ message: "서버 오류 발생" });
   }
 });
+<<<<<<< HEAD
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,3 +375,5 @@ app.get('/allposts/practiceboard', async (req, res) => {
 })
 
 
+=======
+>>>>>>> 1c5bd425b2847b494aacf638c5432c53fd791679
