@@ -22,9 +22,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(
-  cors({
-    origin: "https://kasinoki.site",
-  })
+  cors()
 );
 
 //서버, DB 연결
