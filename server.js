@@ -138,7 +138,6 @@ app.get("/allposts", async (req, res) => {
   // allposts로 get요청이 들어오면 DB의 POST에서 모든 글을 찾아라 그리고 그것을 응답해라
   try {
     const allPosts = await Post.find()
-    .sort({ created_at: -1 })
     .populate({
       path: "user",
       select: "username",
