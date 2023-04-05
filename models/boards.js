@@ -35,7 +35,6 @@ const boardSchema = mongoose.Schema({
       commentNumber : {
         type: Number,
         unique: true,
-        default: 0,
       }
     },
   ],
@@ -51,7 +50,6 @@ const boardSchema = mongoose.Schema({
   postNumber: {
     type: Number,
     unique: true,
-    default: 0,
   }
 });
 
