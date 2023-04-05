@@ -126,12 +126,12 @@ app.post("/duplication", async (req, res) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 자유게시판
 
-let count = 0
-//POST 자유게시판 글 작성 요청
-app.post("/write", async (req, res) => {
-  const { userId, title, content } = req.body;
 
-  count++
+//POST 자유게시판 글 작성 요청
+let postNumber = 1
+app.post("/write", async (req, res) => {
+
+  const { userId, title, content } = req.body;
 
   const date = new Date();
   const year = date.getFullYear();
@@ -145,12 +145,13 @@ app.post("/write", async (req, res) => {
     if (!findUser) {
       return res.status(404).json({ Message: "유저를 찾을 수 없습니다" });
     }
+
     const post = new Board({
       title,
       content,
       user: findUser._id,
       newDate: `${year}.${month}.${day} ${hour}:${minute}`,
-      postNumber: count
+      postNumber: postNumber++
     });
     await post.save();
     return res.status(201).json({ success: true, Message: "글 작성 성공" });
@@ -227,11 +228,10 @@ app.put("/update/:id", async (req, res) => {
   }
 });
 
-let count2 = 0
+
 //PUT 자유게시판 댓글 작성 요청
+let commentNumber = 1
 app.put("/comment/:id", async (req, res) => {
-  
-  count2++
 
   try {
 
@@ -252,11 +252,12 @@ app.put("/comment/:id", async (req, res) => {
       return res.status(404).json({ message: "포스트를 찾을 수 없습니다" });
     }
 
+
     const newComment = {
       comment: comment,
       commentBy: commentBy,
       commentNewDate: `${year}.${month}.${day} ${hour}:${minute}`,
-      commentNumber: count2
+      commentNumber: commentNumber++
     };
 
     post.comments.push(newComment);
