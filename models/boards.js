@@ -31,10 +31,6 @@ const boardSchema = mongoose.Schema({
       commentNewDate: {
         type: String,
         required: true,
-      },
-      commentNumber : {
-        type: Number,
-        unique: true,
       }
     },
   ],
