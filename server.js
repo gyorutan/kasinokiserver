@@ -128,7 +128,7 @@ app.post("/duplication", async (req, res) => {
 
 
 //POST 자유게시판 글 작성 요청
-let postNumber = 1
+let postNumber = 0
 app.post("/write", async (req, res) => {
 
   const { userId, title, content } = req.body;
@@ -230,7 +230,7 @@ app.put("/update/:id", async (req, res) => {
 
 
 //PUT 자유게시판 댓글 작성 요청
-let commentNumber = 1
+let commentNumber = 0
 app.put("/comment/:id", async (req, res) => {
 
   try {
